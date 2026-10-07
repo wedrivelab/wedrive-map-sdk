@@ -1,6 +1,6 @@
 {
   "name": "wedrive-map-sdk",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "WeDrive Map Web SDK",
   "homepage": "https://map.wedrive.kr/",
   "license": "SEE LICENSE IN notice.md",
@@ -8,6 +8,7 @@
   "type": "module",
   "exports": {
     ".": "./dist/wedrive-map.js",
-    "./wedrive-map.css": "./dist/wedrive-map.css"
+    "./wedrive-map.css": "./dist/wedrive-map.css",
+    "./global": "./dist/wedrive-map.global.js"
   }
 }
