@@ -218,9 +218,13 @@ export interface NavProgress {
 }
 /** 안내 화면의 도착 시각. true(기본) 경로로 계산 · false 안 보임(거리만) · 시각 = 서버가 정한 도착 예정을 그대로 (epoch 초 · 밀리초 · ISO 문자열 · Date) */
 export type ArrivalTime = boolean | number | string | Date;
+/** 정류장 하나의 서버 도착 예정. eta: UTC ISO 문자열(null = 미정), estimated: true면 "(추정)" */
+export interface StopEta { eta: string | null; estimated?: boolean }
 export interface NavigateOptions extends Pick<RouteOptions, "via" | "prefer" | "avoid"> {
   from?: Coord; speak?: (text: string) => void; follow?: boolean; watch?: boolean; color?: string;
   arrivalTime?: ArrivalTime;
+  /** [경유 1, …, 목적지] 방문 순서의 서버 도착 예정. 주면 안내 화면은 이 시각만 보인다(걸리는 시간 · 웹맵 계산 시각 없음). 개수가 경유지 + 1과 다르면 전부 미정 */
+  stopEtas?: StopEta[];
 }
 export interface Navigation {
   readonly route: Route;
@@ -239,6 +243,9 @@ export interface Navigation {
   /** 안내 화면의 도착 시각만 바꾼다 (서버 도착 예정이 바뀌었을 때). 안내는 다시 걸지 않는다 */
   setArrivalTime(v: ArrivalTime): this;
   readonly arrivalTime: ArrivalTime;
+  /** 정류장별 서버 도착 예정을 바꾼다 (지금 남은 경유지 + 목적지 순서) */
+  setStopEtas(list: StopEta[]): this;
+  readonly stopEtas: StopEta[] | null;
   stop(): void;
 }
 export type DirectionsPoint = Coord | { name: string; lon: number; lat: number };
@@ -342,7 +349,7 @@ export class WeDriveMap {
   routeMatrix(points: Coord[]): Promise<RouteMatrix>;
   navigate(to: Coord, o?: NavigateOptions): Promise<Navigation>;
   directions(): Directions;
-  openDirections(o?: { from?: DirectionsPoint | "me"; to?: DirectionsPoint; via?: DirectionsPoint[]; arrivalTime?: ArrivalTime }): Directions;
+  openDirections(o?: { from?: DirectionsPoint | "me"; to?: DirectionsPoint; via?: DirectionsPoint[]; arrivalTime?: ArrivalTime; stopEtas?: StopEta[] }): Directions;
   setNavigation(on: boolean): this;
   navigationEnabled(): boolean;
 
