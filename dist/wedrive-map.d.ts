@@ -214,9 +214,13 @@ export interface NavProgress {
   /** 역주행 중인지 */ wrongWay: boolean;
   /** 속도(m/s). 모르면 null */ speed: number | null;
   /** 받은 위치 그대로 [경도, 위도] (at은 경로선 위로 붙인 점). 터널 추정 중이면 null */ raw: LngLat | null;
+  /** 지금 달리는 도로 이름. 이름 없는 길이면 null */ road: string | null;
 }
+/** 안내 화면의 도착 시각. true(기본) 경로로 계산 · false 안 보임(거리만) · 시각 = 서버가 정한 도착 예정을 그대로 (epoch 초 · 밀리초 · ISO 문자열 · Date) */
+export type ArrivalTime = boolean | number | string | Date;
 export interface NavigateOptions extends Pick<RouteOptions, "via" | "prefer" | "avoid"> {
   from?: Coord; speak?: (text: string) => void; follow?: boolean; watch?: boolean; color?: string;
+  arrivalTime?: ArrivalTime;
 }
 export interface Navigation {
   readonly route: Route;
@@ -232,6 +236,9 @@ export interface Navigation {
   recenter(): void;
   /** 지금 자리에서 경로를 다시 찾는다 (재탐색 사이 5초 간격은 지킨다) */
   reroute(): this;
+  /** 안내 화면의 도착 시각만 바꾼다 (서버 도착 예정이 바뀌었을 때). 안내는 다시 걸지 않는다 */
+  setArrivalTime(v: ArrivalTime): this;
+  readonly arrivalTime: ArrivalTime;
   stop(): void;
 }
 export type DirectionsPoint = Coord | { name: string; lon: number; lat: number };
@@ -335,7 +342,7 @@ export class WeDriveMap {
   routeMatrix(points: Coord[]): Promise<RouteMatrix>;
   navigate(to: Coord, o?: NavigateOptions): Promise<Navigation>;
   directions(): Directions;
-  openDirections(o?: { from?: DirectionsPoint | "me"; to?: DirectionsPoint; via?: DirectionsPoint[] }): Directions;
+  openDirections(o?: { from?: DirectionsPoint | "me"; to?: DirectionsPoint; via?: DirectionsPoint[]; arrivalTime?: ArrivalTime }): Directions;
   setNavigation(on: boolean): this;
   navigationEnabled(): boolean;
 
