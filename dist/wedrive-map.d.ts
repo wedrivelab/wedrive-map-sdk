@@ -205,6 +205,15 @@ export interface NavProgress {
   step: RouteStep | null; next_m: number; remaining_m: number; remaining_s: number;
   onRoute: boolean; off_m: number; at: LngLat; bearing: number;
   /** 터널에서 위치가 끊겨 경로를 따라 추정 중인지 */ estimated: boolean;
+  /** 그다음 안내(다음 안내 뒤의 것)와 다음 안내에서 그것까지 거리. 경로로 가는 중이면 올라탄 뒤 첫 안내와 지금 자리에서 그것까지 */
+  then: RouteStep | null; then_m: number | null;
+  /** 다음 경유지까지 남은 거리(m) · 시간(초). 경유지가 안 남았으면 null. via_left = 남은 경유지 수 */
+  via_m: number | null; via_s: number | null; via_left: number;
+  /** 출발 전 경로선까지 가는 중인지. toward = 경로선 가장 가까운 곳 방향(도, 북 = 0) */
+  approach: boolean; toward?: number;
+  /** 역주행 중인지 */ wrongWay: boolean;
+  /** 속도(m/s). 모르면 null */ speed: number | null;
+  /** 받은 위치 그대로 [경도, 위도] (at은 경로선 위로 붙인 점). 터널 추정 중이면 null */ raw: LngLat | null;
 }
 export interface NavigateOptions extends Pick<RouteOptions, "via" | "prefer" | "avoid"> {
   from?: Coord; speak?: (text: string) => void; follow?: boolean; watch?: boolean; color?: string;
@@ -221,6 +230,8 @@ export interface Navigation {
   off(event: string, fn: (...args: any[]) => void): this;
   update(fix: Fix): void;
   recenter(): void;
+  /** 지금 자리에서 경로를 다시 찾는다 (재탐색 사이 5초 간격은 지킨다) */
+  reroute(): this;
   stop(): void;
 }
 export type DirectionsPoint = Coord | { name: string; lon: number; lat: number };
@@ -231,7 +242,8 @@ export interface Directions {
 
 export interface AppBridge {
   available(): boolean;
-  location(): Promise<LatLng & { accuracy_m?: number }>;
+  /** wait(ms) 동안 앱이 좌표 없이 답하면 1초마다 다시 묻는다 (기본 0 = 한 번) */
+  location(o?: { wait?: number }): Promise<LatLng & { accuracy_m?: number }>;
   permission(link: "PUSH" | "LOCATION" | "CAMERA" | "LOCATION_ALWAYS"): Promise<boolean>;
   call(request: string, extra?: Record<string, unknown>): Promise<unknown>;
 }
