@@ -45,7 +45,8 @@ export interface MapOptions extends PlaceOptions, Interaction {
   /** 지도 서버 주소. 내 사이트에서 쓸 때는 꼭 */ server?: string;
   /** JavaScript 키 (앱 WebView면 네이티브 앱 키) */ key?: string;
   /** 네이티브 앱 키와 같이 쓰는 패키지명 · 번들 ID */ app?: string;
-  theme?: "dark" | "light";
+  /** 지도 색상. "auto"는 기기(앱)의 다크 · 라이트를 따라가고, 바뀌면 같이 바뀐다. 기본 "dark" */
+  theme?: "dark" | "light" | "auto";
   /** 화면 방식. 기본 "auto" */
   ui?: UIMode;
   view?: "2d" | "3d";
@@ -270,7 +271,9 @@ export class WeDriveMap {
   constructor(options: MapOptions);
   /** SDK 버전 */ static readonly version: string;
   readonly server: string; readonly key: string; readonly app: string;
-  readonly theme: "dark" | "light"; readonly view: "2d" | "3d"; readonly region: string;
+  /** 지금 그리는 색 (auto면 기기 모드) */ readonly theme: "dark" | "light";
+  /** 고른 테마. auto면 기기를 따라간다 */ readonly themeMode: "dark" | "light" | "auto";
+  readonly view: "2d" | "3d"; readonly region: string;
   readonly locateMode: LocateMode; readonly debug: Required<DebugSwitches>;
   readonly bridge: AppBridge;
   /** 내부 MapLibre Map 객체. SDK에 없는 것은 여기서 (타입은 maplibre-gl의 Map) */
@@ -316,7 +319,8 @@ export class WeDriveMap {
   drawing(opts?: { modes?: DrawMode[]; style?: ShapeStyle; markerOptions?: MarkerOptions }): DrawingManager;
   showRadius(where: Coord, radiusM: number, o?: { color?: string; opacity?: number; fit?: boolean }): this;
   hideRadius(): this;
-  setTheme(theme: "dark" | "light"): this;
+  /** "auto"는 기기의 다크 · 라이트를 따라간다 */
+  setTheme(theme: "dark" | "light" | "auto"): this;
   /** 화면 방식을 바꾼다 */
   setUI(mode: UIMode): this;
   /** 지금 실제로 쓰는 화면 방식 (auto면 폭에 따라 정해진 쪽) */
